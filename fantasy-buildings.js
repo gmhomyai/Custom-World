@@ -1,12 +1,12 @@
 // V13: richer stylized fantasy architecture. Shared low-poly geometry and materials.
-export function createFantasyBuildings(THREE,scene,height){
+export function createFantasyBuildings(THREE,scene,height,worldMaterials){
  const mat=c=>new THREE.MeshLambertMaterial({color:c});
- const timber=mat(0x624331),trim=mat(0x3c2e2b),stone=mat(0x89858a),cream=mat(0xf1d6a1),glass=mat(0x8ce4ec),gold=mat(0xf6ca70);
- const roofs=[mat(0x9e453d),mat(0x3b758c),mat(0x76528b),mat(0x9a623c)];let index=0;
+ const timber=worldMaterials.material('wood'),trim=mat(0x3c2e2b),stone=worldMaterials.material('stone'),cream=worldMaterials.material('plaster'),glass=mat(0x8ce4ec),gold=mat(0xf6ca70);
+ const roofs=[worldMaterials.material('roof',0xd58e85),worldMaterials.material('roof',0x83a9cb),worldMaterials.material('roof',0xbaa0d9),worldMaterials.material('roof',0xd1aa7d)];let index=0;
  function part(group,geo,material,x,y,z){const mesh=new THREE.Mesh(geo,material);mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;group.add(mesh);return mesh}
  function beam(group,w,h,d,x,y,z,m=timber){return part(group,new THREE.BoxGeometry(w,h,d),m,x,y,z)}
  function turret(group,x,z,roof){beam(group,4.5,11,4.5,x,5.5,z,stone);part(group,new THREE.ConeGeometry(4.5,6,5),roof,x,14,z);beam(group,.5,12,.5,x-2.2,6,z-2.2);beam(group,.5,12,.5,x+2.2,6,z+2.2)}
- return function building(x,z,color,label){const g=new THREE.Group();g.position.set(x,height(x,z),z);scene.add(g);const roof=roofs[index++%roofs.length],plaster=mat(color);
+ return function building(x,z,color,label){const g=new THREE.Group();g.position.set(x,height(x,z),z);scene.add(g);const roof=roofs[index++%roofs.length],plaster=worldMaterials.material('plaster',color);
  beam(g,16,1.1,14,0,.55,0,stone);beam(g,14,9,12,0,5.5,0,plaster);
  for(const bx of [-6.7,6.7])for(const bz of [-5.7,5.7])beam(g,.85,10,.85,bx,5.6,bz);
  for(const y of [2.1,9.5]){beam(g,15,.55,.7,0,y,6.1);beam(g,15,.55,.7,0,y,-6.1);beam(g,.7,.55,12,7.1,y,0);beam(g,.7,.55,12,-7.1,y,0)}

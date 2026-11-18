@@ -1,0 +1,57 @@
+{
+  "id": "scene.central-plaza",
+  "version": 1,
+  "theme": "enchanted-twilight",
+  "worldSize": [
+    600,
+    600
+  ],
+  "prefabs": [
+    {
+      "asset": "building.fantasy-cottage",
+      "position": [
+        -45,
+        0,
+        -45
+      ],
+      "color": "#e6c18d",
+      "label": "Avatar Studio"
+    },
+    {
+      "asset": "building.fantasy-cottage",
+      "position": [
+        45,
+        0,
+        -45
+      ],
+      "color": "#8ac5d4",
+      "label": "Mini-game Portal"
+    },
+    {
+      "asset": "building.fantasy-cottage",
+      "position": [
+        -45,
+        0,
+        45
+      ],
+      "color": "#c1b5db",
+      "label": "Housing"
+    },
+    {
+      "asset": "building.fantasy-cottage",
+      "position": [
+        45,
+        0,
+        45
+      ],
+      "color": "#e4a974",
+      "label": "Guild"
+    }
+  ],
+  "environment": [
+    "environment.enchanted-forest",
+    "environment.magic-grove",
+    "environment.fountain-plaza",
+    "environment.dense-ground-cover"
+  ]
+}

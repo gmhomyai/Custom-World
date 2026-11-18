@@ -1,4 +1,4 @@
-"""Custom World — Blender asset builder V1. Runs in background or Scripting workspace."""
+"""Custom World — Blender asset builder V2. Runs in background or Scripting workspace."""
 import bpy, math, os
 from pathlib import Path
 
@@ -25,6 +25,13 @@ stone=material("stone foundation",(.34,.33,.4))
 window=material("golden glowing windows",(1,.59,.18),2.5)
 door=material("oak door",(.3,.17,.09))
 chimney=material("chimney stone",(.43,.4,.4))
+roof_tile=material("roof tile highlight",(.39,.25,.43))
+roof_ridge=material("roof ridge copper",(.58,.38,.27))
+lantern_metal=material("lantern metal",(.17,.14,.19))
+flowers=[material("violet flowers",(.58,.3,.78)),material("pink flowers",(.96,.43,.64))]
+leaves=material("flower leaves",(.22,.48,.3))
+sign=material("sign board",(.36,.21,.12))
+sign_gold=material("sign trim",(.9,.66,.27))
 
 def cube(name, loc, scale, mat, bevel=0):
     bpy.ops.mesh.primitive_cube_add(size=1, location=loc)
@@ -67,8 +74,66 @@ for side in (-1,1):
 cube("chimney",(2,1.3,7.2),(.95,1.05,2.5),chimney,.06)
 cube("chimney cap",(2,1.3,8.5),(1.25,1.35,.25),stone,.04)
 
+
+# V2 architectural detail: layered shingles on both roof slopes.
+for side in (-1,1):
+    for row in range(5):
+        for col in range(10):
+            y=-2.92+col*.65
+            x=side*(.33+row*.68)
+            z=7.06-row*.60
+            tile=cube("individual roof shingle",(x,y,z),(1.0,.61,.085),roof_tile,.025)
+            tile.rotation_euler[1]=side*math.radians(43)
+    ridge=cube("decorative roof ridge",(0,0,7.13),(.24,6.85,.22),roof_ridge,.06)
+
+# Upper half-timber gable trim and ornamental beams.
+for y in (-2.79,2.79):
+    cube("gable central beam",(0,y,5.43),(.19,.2,1.55),timber,.025)
+    cube("gable cross beam",(0,y,5.1),(3.4,.2,.17),timber,.025)
+    for side in (-1,1):
+        beam=cube("gable diagonal brace",(side*1.12,y,5.62),(2.3,.19,.17),timber,.025)
+        beam.rotation_euler[1]=side*math.radians(35)
+
+# Stone doorstep and stair treads.
+for i in range(3):
+    cube("stone entry step",(0,-3.05-i*.42,.30-i*.085),(2.35+i*.32,.8,.22),stone,.06)
+
+# Lanterns beside the entrance: glow is exported in GLB material.
+for x in (-1.55,1.55):
+    cube("lantern wall mount",(x,-2.94,3.25),(.15,.42,.14),lantern_metal,.025)
+    cube("lantern warm core",(x,-3.13,2.94),(.35,.35,.52),window,.045)
+    cube("lantern cap",(x,-3.13,3.24),(.5,.5,.11),lantern_metal,.025)
+    cube("lantern base",(x,-3.13,2.64),(.5,.5,.11),lantern_metal,.025)
+
+# Planters and small flower clusters in front of the cottage.
+for side in (-1,1):
+    x=side*2.55
+    cube("planter box",(x,-3.04,.57),(.95,.7,.65),timber,.055)
+    cube("planter soil",(x,-3.04,.91),(.84,.58,.07),stone,.02)
+    for j in range(5):
+        fx=x+(j-2)*.17
+        fy=-3.05+((j%2)-.5)*.28
+        cube("flower stem",(fx,fy,1.11),(.055,.055,.38),leaves)
+        bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1,radius=.13,location=(fx,fy,1.32))
+        bpy.context.object.name="magical flower"
+        bpy.context.object.data.materials.append(flowers[j%2])
+
+# Sign board above the door; text is converted to mesh for reliable GLB export.
+cube("cottage sign board",(0,-2.93,4.27),(2.45,.15,.55),sign,.045)
+cube("cottage sign top trim",(0,-3.04,4.55),(2.57,.16,.08),sign_gold,.02)
+bpy.ops.object.text_add(location=(-.84,-3.07,4.12),rotation=(math.radians(90),0,0))
+label=bpy.context.object
+label.name="COTTAGE sign lettering"
+label.data.body="COTTAGE"
+label.data.size=.32
+label.data.extrude=.006
+label.data.materials.append(sign_gold)
+bpy.context.view_layer.objects.active=label
+label.select_set(True)
+bpy.ops.object.convert(target="MESH")
+
 # Export selected house objects as a reusable glTF binary asset.
 bpy.ops.object.select_all(action="SELECT")
-path=OUT/"fantasy_cottage_v1.glb"
+path=OUT/"fantasy_cottage_v2.glb"
 bpy.ops.export_scene.gltf(filepath=str(path), export_format="GLB", use_selection=True)
 print("CUSTOM_WORLD_EXPORT_OK:",path)

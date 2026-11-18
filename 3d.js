@@ -30,8 +30,11 @@ function box(w,h,d,x,z,m){return mesh(new THREE.BoxGeometry(w,h,d),m,x,h/2+heigh
 box(16,.12,150,0,0,road);box(150,.12,16,0,0,road);
 const plaza=mesh(new THREE.CylinderGeometry(24,24,.4,32),stone,0,.1,0);const fountain=mesh(new THREE.CylinderGeometry(7,7,1.2,24),mat(0xe6d7b6),0,.7,0);mesh(new THREE.CylinderGeometry(5.8,5.8,.15,24),mat(0x63c9e8),0,1.4,0);
 import {createFantasyBuildings} from './fantasy-buildings.js';
+import {createAssetRegistry} from './assets/registry.js';
+const assets=createAssetRegistry();
 const building=createFantasyBuildings(THREE,scene,height,worldMaterials);
-building(-45,-45,0xe6c18d,'Avatar Studio');building(45,-45,0x8ac5d4,'Mini-game Portal');building(-45,45,0xc1b5db,'Housing');building(45,45,0xe4a974,'Guild');
+assets.register('building.fantasy-cottage',({x,z,color,label})=>building(x,z,color,label));
+for(const [x,z,color,label] of [[-45,-45,0xe6c18d,'Avatar Studio'],[45,-45,0x8ac5d4,'Mini-game Portal'],[-45,45,0xc1b5db,'Housing'],[45,45,0xe4a974,'Guild']])assets.instantiate('building.fantasy-cottage',{x,z,color,label});
 import {createAvatarStudio} from './avatar-studio.js';
 import {addWorldDetails} from './world-details.js';
 import {addFantasyWorld} from './fantasy-world.js';

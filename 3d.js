@@ -1,7 +1,7 @@
 import * as THREE from 'https://esm.sh/three@0.181.0';
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x66577f);scene.fog=new THREE.FogExp2(0x76658e,.0055);
 const camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,450);
-const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;document.querySelector('#app').appendChild(renderer.domElement);
+const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.25;document.querySelector('#app').appendChild(renderer.domElement);
 scene.add(new THREE.HemisphereLight(0xb9b2ff,0x324c56,1.35));const sun=new THREE.DirectionalLight(0xffb88e,1.65);sun.position.set(70,120,40);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-100;sun.shadow.camera.right=100;sun.shadow.camera.top=100;sun.shadow.camera.bottom=-100;scene.add(sun);
 import {createWorldMaterials} from './world-textures.js';
 const worldMaterials=createWorldMaterials(THREE);
@@ -14,10 +14,18 @@ const worldSeed=20261118;function rand(x,z){let n=Math.sin(x*127.1+z*311.7+world
 function height(x,z){const r=Math.hypot(x,z);const blend=THREE.MathUtils.smoothstep(r,85,165);return blend*(2.5*Math.sin(x*.026)*Math.cos(z*.021)+3*Math.sin(x*.012+z*.018));}
 function mesh(geo,m,x,y,z){const o=new THREE.Mesh(geo,m);o.position.set(x,y,z);o.receiveShadow=true;scene.add(o);return o}
 const tileSize=50,loaded=new Map();const terrainMat=grass;
+// Reuse tree geometries across all terrain chunks and draw each type in one instanced call.
+const treeTrunkGeo=new THREE.CylinderGeometry(.6,.85,5,6),treeCrownGeo=new THREE.ConeGeometry(1,10,7);
+const treeDummy=new THREE.Object3D();
 function createChunk(cx,cz){const group=new THREE.Group();const geo=new THREE.PlaneGeometry(tileSize,tileSize,12,12);geo.rotateX(-Math.PI/2);const p=geo.attributes.position;for(let i=0;i<p.count;i++){const x=cx*50+p.getX(i),z=cz*50+p.getZ(i);p.setY(i,height(x,z))}geo.computeVertexNormals();const ground=new THREE.Mesh(geo,terrainMat);ground.position.set(cx*50,0,cz*50);ground.receiveShadow=true;group.add(ground);
-for(let i=0;i<7;i++){const x=cx*50+(rand(cx*19+i,cz*7)-.5)*46,z=cz*50+(rand(cx*3,cz*31+i)-.5)*46;if(Math.abs(x)<75||Math.abs(z)<13||Math.abs(x)>298||Math.abs(z)>298)continue;const h=height(x,z);const t=new THREE.Mesh(new THREE.CylinderGeometry(.6,.85,5,6),trunk);t.position.set(x,h+2.5,z);group.add(t);const crown=new THREE.Mesh(new THREE.ConeGeometry(3.8+rand(i,cx)*2,10,7),leaf);crown.position.set(x,h+9,z);group.add(crown)}
+const trunks=new THREE.InstancedMesh(treeTrunkGeo,trunk,7),crowns=new THREE.InstancedMesh(treeCrownGeo,leaf,7);let count=0;
+for(let i=0;i<7;i++){const x=cx*50+(rand(cx*19+i,cz*7)-.5)*46,z=cz*50+(rand(cx*3,cz*31+i)-.5)*46;if(Math.abs(x)<75||Math.abs(z)<13||Math.abs(x)>298||Math.abs(z)>298)continue;const y=height(x,z);
+treeDummy.position.set(x,y+2.5,z);treeDummy.rotation.set(0,0,0);treeDummy.scale.set(1,1,1);treeDummy.updateMatrix();trunks.setMatrixAt(count,treeDummy.matrix);
+const radius=3.8+rand(i,cx)*2;treeDummy.position.set(x,y+9,z);treeDummy.scale.set(radius,1,radius);treeDummy.updateMatrix();crowns.setMatrixAt(count,treeDummy.matrix);count++}
+trunks.count=crowns.count=count;trunks.instanceMatrix.needsUpdate=true;crowns.instanceMatrix.needsUpdate=true;
+if(count){trunks.computeBoundingSphere();crowns.computeBoundingSphere();group.add(trunks,crowns)}
 scene.add(group);return group}
-function chunks(){const cx=Math.round(player.position.x/50),cz=Math.round(player.position.z/50);const wanted=new Set();for(let x=cx-2;x<=cx+2;x++)for(let z=cz-2;z<=cz+2;z++){if(Math.abs(x)>5||Math.abs(z)>5)continue;const k=x+','+z;wanted.add(k);if(!loaded.has(k))loaded.set(k,createChunk(x,z))}for(const [k,g] of loaded)if(!wanted.has(k)){scene.remove(g);g.traverse(o=>{if(o instanceof THREE.Mesh&&o.geometry!==undefined)o.geometry.dispose()});loaded.delete(k)}}
+function chunks(){const cx=Math.round(player.position.x/50),cz=Math.round(player.position.z/50);const wanted=new Set();for(let x=cx-2;x<=cx+2;x++)for(let z=cz-2;z<=cz+2;z++){if(Math.abs(x)>5||Math.abs(z)>5)continue;const k=x+','+z;wanted.add(k);if(!loaded.has(k))loaded.set(k,createChunk(x,z))}for(const [k,g] of loaded)if(!wanted.has(k)){scene.remove(g);g.traverse(o=>{if(o instanceof THREE.Mesh&&o.geometry!==undefined&&o.geometry!==treeTrunkGeo&&o.geometry!==treeCrownGeo)o.geometry.dispose();if(o.isInstancedMesh)o.dispose()});loaded.delete(k)}}
 function box(w,h,d,x,z,m){return mesh(new THREE.BoxGeometry(w,h,d),m,x,h/2+height(x,z),z)}
 box(16,.12,150,0,0,road);box(150,.12,16,0,0,road);
 const plaza=mesh(new THREE.CylinderGeometry(24,24,.4,32),stone,0,.1,0);const fountain=mesh(new THREE.CylinderGeometry(7,7,1.2,24),mat(0xe6d7b6),0,.7,0);mesh(new THREE.CylinderGeometry(5.8,5.8,.15,24),mat(0x63c9e8),0,1.4,0);

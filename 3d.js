@@ -15,7 +15,8 @@ function chunks(){const cx=Math.round(player.position.x/50),cz=Math.round(player
 function box(w,h,d,x,z,m){return mesh(new THREE.BoxGeometry(w,h,d),m,x,h/2+height(x,z),z)}
 box(16,.12,150,0,0,road);box(150,.12,16,0,0,road);
 const plaza=mesh(new THREE.CylinderGeometry(24,24,.4,32),stone,0,.1,0);const fountain=mesh(new THREE.CylinderGeometry(7,7,1.2,24),mat(0xe6d7b6),0,.7,0);mesh(new THREE.CylinderGeometry(5.8,5.8,.15,24),mat(0x63c9e8),0,1.4,0);
-function building(x,z,color,label){box(13,9,12,x,z,mat(color));const roof=new THREE.Mesh(new THREE.ConeGeometry(11,6,4),mat(0x964c43));roof.rotation.y=Math.PI/4;roof.position.set(x,12,z);scene.add(roof);const sign=document.createElement('canvas');sign.width=256;sign.height=64;const c=sign.getContext('2d');c.fillStyle='#203b3c';c.fillRect(0,0,256,64);c.fillStyle='white';c.font='bold 24px sans-serif';c.textAlign='center';c.fillText(label,128,42);const sprite=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(sign)}));sprite.position.set(x,16,z);sprite.scale.set(14,3.5,1);scene.add(sprite)}
+import {createFantasyBuildings} from './fantasy-buildings.js';
+const building=createFantasyBuildings(THREE,scene,height);
 building(-45,-45,0xe6c18d,'Avatar Studio');building(45,-45,0x8ac5d4,'Mini-game Portal');building(-45,45,0xc1b5db,'Housing');building(45,45,0xe4a974,'Guild');
 import {createAvatarStudio} from './avatar-studio.js';
 import {addWorldDetails} from './world-details.js';

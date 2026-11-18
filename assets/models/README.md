@@ -17,4 +17,4 @@ try {
 }
 ```
 
-Serve the repository over HTTP; browser module and GLB loading may fail via `file://`. Instances share geometry and materials; do not dispose or mutate them per instance. The model has many individual meshes, so profile draw calls before adding many copies. This loader is prepared for integration, but does not replace any existing scene buildings automatically.
+Serve the repository over HTTP; browser module and GLB loading may fail via `file://`. Instances share geometry and materials; do not dispose or mutate them per instance. The model has many individual meshes, so profile draw calls before adding many copies. `3d.html` shows one cottage near the spawn without replacing the existing buildings.

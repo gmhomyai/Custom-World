@@ -1,16 +1,18 @@
-# Blender Auto Sync V1 — Windows
+# Blender Auto Sync — Windows
 
-This first version runs Blender **in the background** and generates a reusable fantasy cottage GLB. It does not control the currently open Blender window.
+The sync builds the **reviewed local** Python builder in a separate, disposable Blender process. It does not control or clear an open Blender project. Update this checkout through Git when you choose; the script does not download or execute remote code.
 
-## Run
-1. Install Blender on Windows.
-2. Download `blender/sync-custom-world.ps1` from this repository to your PC.
-3. Right-click the downloaded file and select **Run with PowerShell**. If your policy blocks execution, open PowerShell in the downloaded folder and run `powershell -NoProfile -ExecutionPolicy Bypass -File .\\sync-custom-world.ps1` only after reviewing the script.
-4. The tool downloads `blender/build_fantasy_cottage.py` from this repository and launches Blender with `--background --factory-startup --python`.
-5. Output: `%USERPROFILE%\\Documents\\CustomWorld\\assets\\models\\fantasy_cottage_v1.glb`.
+```powershell
+cd D:\Projects\Custom-World
+powershell -NoProfile -ExecutionPolicy Bypass -File .\blender\sync-custom-world.ps1
+```
 
-Rerun the same PowerShell file to fetch the latest builder. Blender must be installed in the standard location, on PATH, or provided via an executable path prompt.
+Blender is located on PATH or under `Program Files\Blender Foundation`. To override the executable or output:
 
-**Security:** the PowerShell script downloads and executes Python code from the repository. Review the source and use only a repository you trust. This is a manual pull, not unattended remote control. It does not upload your local files. Future versions can add pinned revisions, verification, and automated asset publishing.
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\blender\sync-custom-world.ps1 -BlenderPath 'C:\Program Files\Blender Foundation\Blender 5.3\blender.exe' -OutputPath 'D:\Models\fantasy_cottage_v2.glb'
+```
 
-**Note:** the builder clears the scene it runs in, but `--background --factory-startup` creates a separate temporary Blender process so your open Blender project remains untouched.
+The default output is `assets/models/fantasy_cottage_v2.glb` in this checkout. A successful run replaces only that output; it leaves V1 and other files alone. A failed build leaves the previous output intact. Blender Python exceptions are treated as failures. Do not run the builder inside an interactive Blender session: it clears the temporary scene and refuses to run outside background mode.
+
+This is a manual build, not continuous syncing, uploading, committing, or deployment. The output can be large and should be reviewed before committing.

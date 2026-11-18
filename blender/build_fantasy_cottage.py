@@ -1,9 +1,17 @@
-"""Custom World — Blender asset builder V2. Runs in background or Scripting workspace."""
-import bpy, math, os
+"""Build the cottage in a disposable Blender background process only."""
+import bpy, math, sys
 from pathlib import Path
 
-OUT = Path.home() / "Documents" / "CustomWorld" / "assets" / "models"
-OUT.mkdir(parents=True, exist_ok=True)
+if not bpy.app.background:
+    raise RuntimeError("Run this builder in a separate Blender background process; it clears the scene.")
+
+args = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
+if args and (len(args) != 2 or args[0] != "--output"):
+    raise ValueError("Usage: blender -b --python build_fantasy_cottage.py -- [--output path.glb]")
+path = Path(args[1]).resolve() if args else Path(__file__).resolve().parent.parent / "assets" / "models" / "fantasy_cottage_v2.glb"
+if path.suffix.lower() != ".glb":
+    raise ValueError("Output must be a .glb file")
+path.parent.mkdir(parents=True, exist_ok=True)
 bpy.ops.object.select_all(action="SELECT")
 bpy.ops.object.delete(use_global=False)
 
@@ -26,6 +34,7 @@ window=material("golden glowing windows",(1,.59,.18),2.5)
 door=material("oak door",(.3,.17,.09))
 chimney=material("chimney stone",(.43,.4,.4))
 roof_tile=material("roof tile highlight",(.39,.25,.43))
+roof_tile_alt=material("roof tile lavender",(.34,.21,.38))
 roof_ridge=material("roof ridge copper",(.58,.38,.27))
 lantern_metal=material("lantern metal",(.17,.14,.19))
 flowers=[material("violet flowers",(.58,.3,.78)),material("pink flowers",(.96,.43,.64))]
@@ -46,6 +55,15 @@ def cube(name, loc, scale, mat, bevel=0):
 
 cube("foundation",(0,0,.24),(6.8,5.8,.48),stone,.08)
 cube("plaster walls",(0,0,2.6),(6.3,5.2,4.3),plaster,.08)
+# Close the two triangular ends of the pitched roof.
+mesh=bpy.data.meshes.new("gable walls mesh")
+mesh.from_pydata([(-3.12,-2.6,4.75),(3.12,-2.6,4.75),(0,-2.6,7.35),
+                  (-3.12,2.6,4.75),(3.12,2.6,4.75),(0,2.6,7.35)], [],
+                 [(0,1,2),(3,5,4)])
+mesh.update()
+gable=bpy.data.objects.new("plaster gables",mesh)
+bpy.context.collection.objects.link(gable)
+gable.data.materials.append(plaster)
 for x in (-3.16,3.16):
     for y in (-2.65,2.65):
         cube("timber post",(x,y,2.75),(.3,.35,5.0),timber,.035)
@@ -81,10 +99,10 @@ for side in (-1,1):
         for col in range(10):
             y=-2.92+col*.65
             x=side*(.33+row*.68)
-            z=7.06-row*.60
-            tile=cube("individual roof shingle",(x,y,z),(1.0,.61,.085),roof_tile,.025)
+            z=5.9+(1.65-abs(x))*math.tan(math.radians(43))+.19
+            tile=cube("individual roof shingle",(x,y,z),(1.0,.61,.085),roof_tile if (row+col)%3 else roof_tile_alt,.025)
             tile.rotation_euler[1]=side*math.radians(43)
-    ridge=cube("decorative roof ridge",(0,0,7.13),(.24,6.85,.22),roof_ridge,.06)
+cube("decorative roof ridge",(0,0,7.48),(.32,6.85,.25),roof_ridge,.06)
 
 # Upper half-timber gable trim and ornamental beams.
 for y in (-2.79,2.79):
@@ -97,6 +115,12 @@ for y in (-2.79,2.79):
 # Stone doorstep and stair treads.
 for i in range(3):
     cube("stone entry step",(0,-3.05-i*.42,.30-i*.085),(2.35+i*.32,.8,.22),stone,.06)
+
+# Door boards and iron straps add readable detail from the front.
+for x in (-.48, -.24, 0, .24, .48):
+    cube("door plank seam",(x,-2.955,1.38),(.025,.018,2.35),timber)
+for z in (.65,2.05):
+    cube("door iron strap",(0,-2.975,z),(1.35,.04,.09),lantern_metal,.01)
 
 # Lanterns beside the entrance: glow is exported in GLB material.
 for x in (-1.55,1.55):
@@ -134,6 +158,5 @@ bpy.ops.object.convert(target="MESH")
 
 # Export selected house objects as a reusable glTF binary asset.
 bpy.ops.object.select_all(action="SELECT")
-path=OUT/"fantasy_cottage_v2.glb"
-bpy.ops.export_scene.gltf(filepath=str(path), export_format="GLB", use_selection=True)
+bpy.ops.export_scene.gltf(filepath=str(path), export_format="GLB", use_selection=True, export_texcoords=False)
 print("CUSTOM_WORLD_EXPORT_OK:",path)

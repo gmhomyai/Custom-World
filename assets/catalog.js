@@ -1,6 +1,7 @@
 /** Stable identifiers, independent of future mesh/texture implementation. */
 export const assetCatalog=Object.freeze([
  {id:'building.fantasy-cottage',type:'model',source:'fantasy-buildings.js',tags:['town','house','guild','minigame'],status:'procedural'},
+ {id:'building.fantasy-cottage-v2',type:'model',source:'assets/models/fantasy_cottage_v2.glb',tags:['town','house'],status:'glb'},
  {id:'environment.enchanted-forest',type:'environment',source:'enchanted-world.js',tags:['forest','dungeon','town'],status:'procedural'},
  {id:'environment.magic-grove',type:'environment',source:'enchanted-grove.js',tags:['forest','portal'],status:'procedural'},
  {id:'environment.fountain-plaza',type:'environment',source:'environment-polish.js',tags:['town','hub'],status:'procedural'},

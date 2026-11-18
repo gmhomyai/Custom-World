@@ -13,7 +13,7 @@
 - `assets/catalog.js`: stable IDs and metadata (model / material / effect / environment)
 - `assets/registry.js`: reusable runtime prefab registry and instantiation API
 - `assets/scenes/*.json`: scene blueprints, independent of rendering engine
-- `assets/models/`: future GLB/GLTF source and optimized variants
+- `assets/models/`: generated GLB models (see `models/README.md`)
 - `assets/textures/`: future albedo/normal/roughness/ORM textures
 - `assets/effects/`: future shader/particle effect definitions
 - `assets/source/`: editable Blender/source files (large binaries via Git LFS or object storage)
@@ -25,7 +25,7 @@ library.register('building.fantasy-cottage', ({x,z,color,label}) => createBuildi
 library.instantiate('building.fantasy-cottage', {x:45,z:45,color:0xe4a974,label:'Guild'});
 ```
 
-Catalog entries document reusable assets even when the current geometry is still procedural. They are NOT downloadable GLB models yet. Keep stable IDs when swapping procedural meshes for GLB later. Do not dispose shared geometries/materials on instance removal; scene instances own only their transforms and unique state.
+Catalog entries document both procedural and GLB assets. The existing cottage remains procedural; a separate V2 GLB and loader are available for future integration. Do not dispose shared geometries/materials on instance removal; scene instances own only their transforms and unique state.
 
 ## Performance
 - Share geometries, materials and texture atlases; prefer InstancedMesh for repeated scenery.

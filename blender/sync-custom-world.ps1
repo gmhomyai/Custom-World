@@ -22,6 +22,6 @@ if (-not (Test-Path $blender)) { throw "Blender executable not found: $blender" 
 Write-Host "Using Blender: $blender"
 & $blender --background --factory-startup --python $builder
 if ($LASTEXITCODE -ne 0) { throw "Blender failed with exit code $LASTEXITCODE" }
-$out = Join-Path $root "assets\models\fantasy_cottage_v1.glb"
+$out = Join-Path $root "assets\models\fantasy_cottage_v2.glb"
 if (-not (Test-Path $out)) { throw "Expected GLB missing: $out" }
 Write-Host "SUCCESS: $out" -ForegroundColor Green

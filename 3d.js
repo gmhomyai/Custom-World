@@ -3,7 +3,11 @@ const scene=new THREE.Scene();scene.background=new THREE.Color(0x66577f);scene.f
 const camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,450);
 const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;document.querySelector('#app').appendChild(renderer.domElement);
 scene.add(new THREE.HemisphereLight(0xb9b2ff,0x324c56,1.35));const sun=new THREE.DirectionalLight(0xffb88e,1.65);sun.position.set(70,120,40);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-100;sun.shadow.camera.right=100;sun.shadow.camera.top=100;sun.shadow.camera.bottom=-100;scene.add(sun);
-const mat=(color)=>new THREE.MeshLambertMaterial({color});const grass=mat(0x547e70),road=mat(0xc18e84),trunk=mat(0x77523a),leaf=mat(0x38844c),stone=mat(0x80788e);
+import {createWorldMaterials} from './world-textures.js';
+const worldMaterials=createWorldMaterials(THREE);
+const mat=(color)=>new THREE.MeshLambertMaterial({color});const grass=worldMaterials.material('grass'),road=worldMaterials.material('road'),trunk=worldMaterials.material('wood'),leaf=mat(0x38844c),stone=worldMaterials.material('stone');
+// Terrain has independent UV scale per chunk so texture detail stays consistent.
+const terrainTexture=worldMaterials.maps.grass.clone();terrainTexture.needsUpdate=true;terrainTexture.repeat.set(7,7);grass.map=terrainTexture;grass.needsUpdate=true;
 const worldSeed=20261118;function rand(x,z){let n=Math.sin(x*127.1+z*311.7+worldSeed)*43758.5453;return n-Math.floor(n)}
 function height(x,z){const r=Math.hypot(x,z);const blend=THREE.MathUtils.smoothstep(r,85,165);return blend*(2.5*Math.sin(x*.026)*Math.cos(z*.021)+3*Math.sin(x*.012+z*.018));}
 function mesh(geo,m,x,y,z){const o=new THREE.Mesh(geo,m);o.position.set(x,y,z);o.receiveShadow=true;scene.add(o);return o}
@@ -16,7 +20,7 @@ function box(w,h,d,x,z,m){return mesh(new THREE.BoxGeometry(w,h,d),m,x,h/2+heigh
 box(16,.12,150,0,0,road);box(150,.12,16,0,0,road);
 const plaza=mesh(new THREE.CylinderGeometry(24,24,.4,32),stone,0,.1,0);const fountain=mesh(new THREE.CylinderGeometry(7,7,1.2,24),mat(0xe6d7b6),0,.7,0);mesh(new THREE.CylinderGeometry(5.8,5.8,.15,24),mat(0x63c9e8),0,1.4,0);
 import {createFantasyBuildings} from './fantasy-buildings.js';
-const building=createFantasyBuildings(THREE,scene,height);
+const building=createFantasyBuildings(THREE,scene,height,worldMaterials);
 building(-45,-45,0xe6c18d,'Avatar Studio');building(45,-45,0x8ac5d4,'Mini-game Portal');building(-45,45,0xc1b5db,'Housing');building(45,45,0xe4a974,'Guild');
 import {createAvatarStudio} from './avatar-studio.js';
 import {addWorldDetails} from './world-details.js';

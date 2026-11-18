@@ -8,6 +8,8 @@ const worldMaterials=createWorldMaterials(THREE);
 import {createGraphicsSettings} from './graphics-settings.js';
 const graphics=createGraphicsSettings(THREE,renderer,scene,camera,sun);
 const mat=(color)=>new THREE.MeshLambertMaterial({color});const grass=worldMaterials.material('grass'),road=worldMaterials.material('road'),trunk=worldMaterials.material('wood'),leaf=mat(0x38844c),stone=worldMaterials.material('stone');
+import {createTwilightPlaza} from './twilight-plaza.js';
+const plazaPaving=createTwilightPlaza(THREE,scene);
 // Terrain has independent UV scale per chunk so texture detail stays consistent.
 const terrainTexture=worldMaterials.maps.grass.clone();terrainTexture.needsUpdate=true;terrainTexture.repeat.set(7,7);grass.map=terrainTexture;grass.needsUpdate=true;
 const worldSeed=20261118;function rand(x,z){let n=Math.sin(x*127.1+z*311.7+worldSeed)*43758.5453;return n-Math.floor(n)}
@@ -28,7 +30,7 @@ scene.add(group);return group}
 function chunks(){const cx=Math.round(player.position.x/50),cz=Math.round(player.position.z/50);const wanted=new Set();for(let x=cx-2;x<=cx+2;x++)for(let z=cz-2;z<=cz+2;z++){if(Math.abs(x)>5||Math.abs(z)>5)continue;const k=x+','+z;wanted.add(k);if(!loaded.has(k))loaded.set(k,createChunk(x,z))}for(const [k,g] of loaded)if(!wanted.has(k)){scene.remove(g);g.traverse(o=>{if(o instanceof THREE.Mesh&&o.geometry!==undefined&&o.geometry!==treeTrunkGeo&&o.geometry!==treeCrownGeo)o.geometry.dispose();if(o.isInstancedMesh)o.dispose()});loaded.delete(k)}}
 function box(w,h,d,x,z,m){return mesh(new THREE.BoxGeometry(w,h,d),m,x,h/2+height(x,z),z)}
 box(16,.12,150,0,0,road);box(150,.12,16,0,0,road);
-const plaza=mesh(new THREE.CylinderGeometry(24,24,.4,32),stone,0,.1,0);const fountain=mesh(new THREE.CylinderGeometry(7,7,1.2,24),mat(0xe6d7b6),0,.7,0);mesh(new THREE.CylinderGeometry(5.8,5.8,.15,24),mat(0x63c9e8),0,1.4,0);
+const plaza=mesh(new THREE.CylinderGeometry(24,24,.4,64),plazaPaving,0,.1,0);const fountain=mesh(new THREE.CylinderGeometry(7,7,1.2,24),mat(0xe6d7b6),0,.7,0);mesh(new THREE.CylinderGeometry(5.8,5.8,.15,24),mat(0x63c9e8),0,1.4,0);
 import {createFantasyBuildings} from './fantasy-buildings.js';
 import {createAssetRegistry} from './assets/registry.js';
 import {createGlbLibrary,fantasyCottageV2Url} from './assets/glb-loader.js';

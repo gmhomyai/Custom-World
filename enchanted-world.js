@@ -2,9 +2,18 @@
 export function createEnchantedWorld(THREE,scene,height){
 const m=(c,e=0)=>new THREE.MeshLambertMaterial({color:c,emissive:c,emissiveIntensity:e});
 const bark=m(0x64445c),stone=[m(0x68618c),m(0x77709b),m(0x55577e)],pink=m(0xe85a91,.08),violet=m(0x7857b6,.08),blue=m(0x3c93b8,.08),leaf=m(0x537e76),glow=m(0x79f6ff,.85),warm=m(0xffb56e,.6),grass=[m(0x4a786b),m(0x628879),m(0x76688a)],rock=m(0x77728e);
-const geo={trunk:new THREE.CylinderGeometry(.7,1.25,1,7),cap:new THREE.SphereGeometry(1,9,5,0,Math.PI*2,0,Math.PI/2),rock:new THREE.DodecahedronGeometry(1,0),cone:new THREE.ConeGeometry(1,1,6),orb:new THREE.OctahedronGeometry(1,0),blade:new THREE.ConeGeometry(1,1,3)};
+// One shared painted pattern adds mushroom spots without extra geometry or draw calls.
+const capCanvas=document.createElement('canvas');capCanvas.width=256;capCanvas.height=128;
+const capContext=capCanvas.getContext('2d');capContext.fillStyle='#aaa';capContext.fillRect(0,0,256,128);
+for(let row=0;row<4;row++)for(let col=0;col<8;col++){
+ const x=col*32+(row%2)*16,y=16+row*31,r=4+((row*7+col*11)%4);
+ capContext.fillStyle='#f5e8ff';capContext.beginPath();capContext.ellipse(x,y,r*1.3,r,0,0,Math.PI*2);capContext.fill();
+}
+const capTexture=new THREE.CanvasTexture(capCanvas);capTexture.colorSpace=THREE.SRGBColorSpace;capTexture.wrapS=THREE.RepeatWrapping;
+const caps=new Map([[pink,new THREE.MeshLambertMaterial({color:0xe85a91,map:capTexture,emissive:0x5a1735,emissiveIntensity:.15})],[violet,new THREE.MeshLambertMaterial({color:0x7857b6,map:capTexture,emissive:0x301660,emissiveIntensity:.15})],[blue,new THREE.MeshLambertMaterial({color:0x3c93b8,map:capTexture,emissive:0x104050,emissiveIntensity:.15})]]);
+const geo={trunk:new THREE.CylinderGeometry(.7,1.25,1,7),cap:new THREE.SphereGeometry(1,9,5,0,Math.PI*2,0,Math.PI/2),capRing:new THREE.TorusGeometry(2.3,.13,5,12),rock:new THREE.DodecahedronGeometry(1,0),cone:new THREE.ConeGeometry(1,1,6),orb:new THREE.OctahedronGeometry(1,0),blade:new THREE.ConeGeometry(1,1,3)};
 function put(g,material,x,y,z,sx=1,sy=1,sz=1,cast=false){const o=new THREE.Mesh(g,material);o.position.set(x,y,z);o.scale.set(sx,sy,sz);o.castShadow=cast;o.receiveShadow=true;scene.add(o);return o}
-function mushroom(x,z,size,color){const y=height(x,z);put(geo.trunk,bark,x,y+size*2,z,size*.42,size*4,size*.42,true);const cap=put(geo.cap,color,x,y+size*4,z,size*3.3,size*1.35,size*3.3,true);cap.rotation.z=.05;put(new THREE.TorusGeometry(size*2.3,size*.13,5,12),glow,x,y+size*4,z).rotation.x=Math.PI/2;}
+function mushroom(x,z,size,color){const y=height(x,z);put(geo.trunk,bark,x,y+size*2,z,size*.42,size*4,size*.42,true);const cap=put(geo.cap,caps.get(color)||color,x,y+size*4,z,size*3.3,size*1.35,size*3.3,true);cap.rotation.z=.05;put(geo.capRing,glow,x,y+size*4,z,size,size,size).rotation.x=Math.PI/2;}
 function cliff(x,z,scale){const y=height(x,z);for(let j=0;j<5;j++){const a=j*2.4,r=scale*(.45+j*.08),p=put(geo.rock,stone[j%3],x+Math.cos(a)*r,y+scale*(.6+j*.4),z+Math.sin(a)*r,scale*(.8+j*.06),scale*(1+j*.15),scale*.72,true);p.rotation.y=j*.7}}
 function fir(x,z,size){const y=height(x,z);put(geo.trunk,bark,x,y+size*2,z,size*.25,size*4,size*.25,true);for(let j=0;j<3;j++){const p=put(geo.cone,leaf,x,y+size*(3+j*1.7),z,size*(2.2-j*.35),size*(3-j*.25),size*(2.2-j*.35),true);p.rotation.y=j*.3}}
 function lantern(x,z){const y=height(x,z);put(geo.trunk,bark,x,y+2.3,z,.22,4.6,.22);put(geo.orb,warm,x,y+4.9,z,.7,.95,.7);const light=new THREE.PointLight(0xffa45b,1.5,20,2);light.position.set(x,y+5,z);scene.add(light)}

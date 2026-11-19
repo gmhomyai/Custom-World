@@ -96,16 +96,6 @@ export function drawAvatarSprite(ctx,options={}){
   path([[-17,-54],[-24,-52],[-26,-44],[-17,-42]],mech?'#6987a8':'#b8c6ce','#34495c');
   path([[17,-54],[24,-52],[26,-44],[17,-42]],mech?'#6987a8':'#b8c6ce','#34495c');
  }
- // Equipment layer: hand-held items attach to the right-hand anchor.
- if(a.weapon==='sword'){
-  line([[20,-28],[33,-57]],'#a4b6c7',5);line([[20,-28],[33,-57]],'#f3f9ff',2);
-  line([[15,-34],[27,-30]],'#c5a56c',4);ell(19,-27,3,3,'#e2c17c');
- }else if(a.weapon==='staff'){
-  line([[20,-21],[32,-90]],'#704c3b',4);ell(32,-92,7,9,'#6ad8ff','#c7f6ff',2);ell(30,-95,2,3,'#fff');
- }else if(a.weapon==='blaster'){
-  path([[18,-31],[30,-38],[44,-37],[45,-30],[29,-28],[25,-19],[20,-19]],'#667f99','#293c55',2);
-  path([[35,-36],[46,-36],[46,-31],[35,-31]],'#68e8fc','#39708a');
- }
  // neck, ears, head: oversized anime-chibi proportions
  path([[-6,-63],[6,-63],[6,-53],[-6,-53]],a.skin,'#b98470');
  if(a.hairStyle==='long'){
@@ -160,12 +150,12 @@ export function drawAvatarSprite(ctx,options={}){
  line([[19,-102],[21,-97]],'#171a2d55',1.2);
  if(a.hairStyle==='long'){line([[-23,-88],[-23,-66]],'#ffffff30',1.4);line([[22,-88],[23,-64]],'#ffffff2b',1.4);}
  if(a.hairStyle==='spiky'){line([[-14,-113],[-12,-118]],'#ffffff50',1.4);line([[8,-116],[12,-119]],'#ffffff45',1.4);}
- if(a.outfit==='military'){
+ if(a.head==='none'&&a.outfit==='military'){
   // Beret-like soft tactical cap; hair and face remain visible.
   path([[-23,-108],[-17,-120],[-2,-124],[14,-119],[22,-109],[18,-104],[-19,-103]],'#526b55','#293f3a',2);
   line([[-18,-106],[18,-106]],'#b1bd9b',2);
   ell(4,-116,2.2,2.2,'#d9c18c');
- }else if(a.outfit==='powered'){
+ }else if(a.head==='none'&&a.outfit==='powered'){
   // Open-faced sci-fi crown preserves the character's facial expression.
   path([[-24,-104],[-21,-115],[-12,-120],[-7,-110],[8,-110],[14,-120],[23,-113],[25,-102],[17,-105],[11,-108],[-11,-108],[-18,-104]],'#9eafc4','#30435d',2);
   path([[-13,-110],[13,-110],[9,-105],[-9,-105]],'#55d6ec','#245e7d');
@@ -184,6 +174,16 @@ export function drawAvatarSprite(ctx,options={}){
   path([[-24,-104],[-21,-117],[-8,-124],[8,-124],[21,-117],[24,-104],[18,-100],[-18,-100]],'#849db6','#2b4059',2);
   path([[-16,-108],[16,-108],[12,-103],[-12,-103]],'#61e4f0','#34647c');
   ell(-22,-96,3,6,'#5d7896');ell(22,-96,3,6,'#5d7896');
+ }
+ // Foreground hand-held items: drawn after face/hair/headgear to avoid being hidden. to the right-hand anchor.
+ if(a.weapon==='sword'){
+  line([[20,-28],[33,-57]],'#a4b6c7',5);line([[20,-28],[33,-57]],'#f3f9ff',2);
+  line([[15,-34],[27,-30]],'#c5a56c',4);ell(19,-27,3,3,'#e2c17c');
+ }else if(a.weapon==='staff'){
+  line([[20,-21],[32,-90]],'#704c3b',4);ell(32,-92,7,9,'#6ad8ff','#c7f6ff',2);ell(30,-95,2,3,'#fff');
+ }else if(a.weapon==='blaster'){
+  path([[18,-31],[30,-38],[44,-37],[45,-30],[29,-28],[25,-19],[20,-19]],'#667f99','#293c55',2);
+  path([[35,-36],[46,-36],[46,-31],[35,-31]],'#68e8fc','#39708a');
  }
  // Independent facial accessories: glasses, goggles, and floating magical halo.
  if(!back && a.accessory==='glasses'){

@@ -1,6 +1,6 @@
 // Shared high-detail 2D chibi renderer. All parts are drawn at a ground anchor.
 // Same source powers the character editor, its item previews and the Lobby.
-export const AVATAR_2D_DEFAULTS=Object.freeze({skin:'#f1c49d',hair:'#67412f',shirt:'#497cba',pants:'#4b5779',shoes:'#463d40',hairStyle:'short',outfit:'casual',accessory:'none'});
+export const AVATAR_2D_DEFAULTS=Object.freeze({skin:'#f1c49d',hair:'#67412f',shirt:'#497cba',pants:'#4b5779',shoes:'#463d40',hairStyle:'short',outfit:'casual',accessory:'none',head:'none',armor:'none',legs:'default',feet:'default',weapon:'none'});
 export function drawAvatarSprite(ctx,options={}){
  const a={...AVATAR_2D_DEFAULTS,...options};
  const direction=['front','right','back','left'].includes(a.direction)?a.direction:'front';
@@ -22,6 +22,18 @@ export function drawAvatarSprite(ctx,options={}){
   path([[-14,-55],[-25,-48],[-30,-10],[-13,-15],[0,-11],[13,-15],[30,-10],[25,-48],[14,-55]],'#863d67','#382b4b',2);
   path([[-14,-51],[-22,-43],[-25,-15],[-14,-20]],'#dc789a80',null);
   line([[15,-52],[24,-19]],'#f2afbf80',1.5);
+ }
+ // Equipment layer: trousers and footwear, independent from the outfit.
+ if(a.legs==='cargo'){
+  for(const x of [-12,5]){path([[x,-24],[x+8,-24],[x+8,-15],[x,-15]],'#657457','#303e3c');line([[x+2,-21],[x+6,-21]],'#d6d2a1',1);}
+ }else if(a.legs==='plate'){
+  for(const x of [-13,3]){path([[x,-27],[x+11,-27],[x+12,-9],[x+1,-9]],'#a3b6c7','#34495b',1.5);line([[x+3,-23],[x+9,-23]],'#e8f6ff',1.5);}
+ }
+ if(a.feet==='boots'){
+  path([[-16,-13],[-3,-13],[-3,-3],[-17,-3]],'#72503d','#3a3033',1.5);path([[3,-13],[16,-13],[18,-3],[3,-3]],'#72503d','#3a3033',1.5);
+  line([[-13,-9],[-6,-9]],'#dfbc83',2);line([[6,-9],[13,-9]],'#dfbc83',2);
+ }else if(a.feet==='mech'){
+  for(const x of [-15,3]){path([[x,-14],[x+12,-14],[x+15,-2],[x-3,-2]],'#819eb5','#2a4159',1.7);line([[x+2,-8],[x+10,-8]],'#66efff',2);}
  }
  // arms and sleeves
  path([[-15,-55],[-24,-49],[-22,-28],[-14,-27],[-10,-36]],a.shirt,'#3e3d4b',2);
@@ -69,6 +81,30 @@ export function drawAvatarSprite(ctx,options={}){
   path([[-13,-27],[-2,-27],[-2,-10],[-14,-10]],'#8c9fae','#314255',1.8);
   path([[2,-27],[13,-27],[14,-10],[2,-10]],'#8c9fae','#314255',1.8);
   line([[-11,-13],[-5,-13]],'#91efff',2);line([[5,-13],[11,-13]],'#91efff',2);
+ }
+ // Equipment layer: torso armor is independent of outfit and color.
+ if(a.armor==='leather'){
+  path([[-14,-54],[-8,-58],[8,-58],[14,-54],[12,-32],[-12,-32]],'#795642','#352f35',2);
+  path([[-9,-51],[9,-51],[7,-37],[-7,-37]],'#a37b55','#594038');
+  line([[-12,-48],[12,-36]],'#e0bd80',2);
+ }else if(a.armor==='plate'||a.armor==='mech'){
+  const mech=a.armor==='mech';
+  path([[-16,-54],[-8,-60],[8,-60],[16,-54],[13,-33],[-13,-33]],mech?'#5b7899':'#aebac3','#2d3e55',2);
+  path([[-12,-51],[0,-55],[12,-51],[10,-38],[-10,-38]],mech?'#253e60':'#d6dfe3','#607287');
+  ell(0,-45,mech?5:3,mech?5:3,mech?'#5cecff':'#d7bb70','#536e7b');
+  line([[-13,-36],[13,-36]],mech?'#80eaff':'#f3f6f7',2);
+  path([[-17,-54],[-24,-52],[-26,-44],[-17,-42]],mech?'#6987a8':'#b8c6ce','#34495c');
+  path([[17,-54],[24,-52],[26,-44],[17,-42]],mech?'#6987a8':'#b8c6ce','#34495c');
+ }
+ // Equipment layer: hand-held items attach to the right-hand anchor.
+ if(a.weapon==='sword'){
+  line([[20,-28],[33,-57]],'#a4b6c7',5);line([[20,-28],[33,-57]],'#f3f9ff',2);
+  line([[15,-34],[27,-30]],'#c5a56c',4);ell(19,-27,3,3,'#e2c17c');
+ }else if(a.weapon==='staff'){
+  line([[20,-21],[32,-90]],'#704c3b',4);ell(32,-92,7,9,'#6ad8ff','#c7f6ff',2);ell(30,-95,2,3,'#fff');
+ }else if(a.weapon==='blaster'){
+  path([[18,-31],[30,-38],[44,-37],[45,-30],[29,-28],[25,-19],[20,-19]],'#667f99','#293c55',2);
+  path([[35,-36],[46,-36],[46,-31],[35,-31]],'#68e8fc','#39708a');
  }
  // neck, ears, head: oversized anime-chibi proportions
  path([[-6,-63],[6,-63],[6,-53],[-6,-53]],a.skin,'#b98470');
@@ -135,6 +171,19 @@ export function drawAvatarSprite(ctx,options={}){
   path([[-13,-110],[13,-110],[9,-105],[-9,-105]],'#55d6ec','#245e7d');
   ell(-20,-93,3,7,'#728ca9','#293d59');ell(20,-93,3,7,'#728ca9','#293d59');
   line([[-8,-109],[8,-109]],'#ecffff',1.3);
+ }
+ // Headgear equipment layer, separate from outfit and hair.
+ if(a.head==='helmet'){
+  path([[-25,-103],[-21,-116],[-12,-121],[13,-121],[22,-115],[25,-103],[22,-97],[-22,-97]],'#68775d','#304338',2);
+  path([[-24,-101],[24,-101],[21,-95],[-21,-95]],'#405843','#293b34');
+  line([[-13,-115],[11,-115]],'#bdc7a6',1.5);
+ }else if(a.head==='crown'){
+  path([[-21,-112],[-23,-126],[-12,-119],[-4,-135],[5,-120],[17,-130],[21,-112]],'#e8c15b','#846142',2);
+  ell(0,-121,3,4,'#6cddf1','#fff1ae');ell(-15,-118,2,2,'#d86c88');ell(14,-118,2,2,'#d86c88');
+ }else if(a.head==='tech'){
+  path([[-24,-104],[-21,-117],[-8,-124],[8,-124],[21,-117],[24,-104],[18,-100],[-18,-100]],'#849db6','#2b4059',2);
+  path([[-16,-108],[16,-108],[12,-103],[-12,-103]],'#61e4f0','#34647c');
+  ell(-22,-96,3,6,'#5d7896');ell(22,-96,3,6,'#5d7896');
  }
  // Independent facial accessories: glasses, goggles, and floating magical halo.
  if(!back && a.accessory==='glasses'){

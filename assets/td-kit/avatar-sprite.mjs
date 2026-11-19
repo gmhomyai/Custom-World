@@ -1,6 +1,6 @@
 // Shared high-detail 2D chibi renderer. All parts are drawn at a ground anchor.
 // Same source powers the character editor, its item previews and the Lobby.
-export const AVATAR_2D_DEFAULTS=Object.freeze({skin:'#f1c49d',hair:'#67412f',shirt:'#497cba',pants:'#4b5779',shoes:'#463d40',hairStyle:'short',outfit:'casual'});
+export const AVATAR_2D_DEFAULTS=Object.freeze({skin:'#f1c49d',hair:'#67412f',shirt:'#497cba',pants:'#4b5779',shoes:'#463d40',hairStyle:'short',outfit:'casual',accessory:'none'});
 export function drawAvatarSprite(ctx,options={}){
  const a={...AVATAR_2D_DEFAULTS,...options};
  const direction=['front','right','back','left'].includes(a.direction)?a.direction:'front';
@@ -17,6 +17,12 @@ export function drawAvatarSprite(ctx,options={}){
  path([[-14,-10],[-3,-10],[0,-1],[-7,1],[-18,-2]],a.shoes,'#292c39',2);
  path([[3,-10],[14,-10],[19,-2],[9,1],[2,-2]],a.shoes,'#292c39',2);
  line([[-17,-2],[-7,0]],'#c5b5a0',2);line([[9,0],[18,-2]],'#c5b5a0',2);
+ // Independent cape accessory is behind the torso, so any outfit may use it.
+ if(a.accessory==='cape'){
+  path([[-14,-55],[-25,-48],[-30,-10],[-13,-15],[0,-11],[13,-15],[30,-10],[25,-48],[14,-55]],'#863d67','#382b4b',2);
+  path([[-14,-51],[-22,-43],[-25,-15],[-14,-20]],'#dc789a80',null);
+  line([[15,-52],[24,-19]],'#f2afbf80',1.5);
+ }
  // arms and sleeves
  path([[-15,-55],[-24,-49],[-22,-28],[-14,-27],[-10,-36]],a.shirt,'#3e3d4b',2);
  path([[15,-55],[24,-49],[22,-28],[14,-27],[10,-36]],a.shirt,'#3e3d4b',2);
@@ -129,6 +135,20 @@ export function drawAvatarSprite(ctx,options={}){
   path([[-13,-110],[13,-110],[9,-105],[-9,-105]],'#55d6ec','#245e7d');
   ell(-20,-93,3,7,'#728ca9','#293d59');ell(20,-93,3,7,'#728ca9','#293d59');
   line([[-8,-109],[8,-109]],'#ecffff',1.3);
+ }
+ // Independent facial accessories: glasses, goggles, and floating magical halo.
+ if(!back && a.accessory==='glasses'){
+  if(side){ell(10,-82,9,11,'#d8f4ff30','#293c55',2.3);line([[18,-84],[23,-86]],'#293c55',2.2);}
+  else {ell(-10,-82,10,11,'#d8f4ff24','#293c55',2.3);ell(10,-82,10,11,'#d8f4ff24','#293c55',2.3);line([[-1,-84],[1,-84]],'#293c55',2);}
+ }else if(!back && a.accessory==='goggles'){
+  path([[-24,-91],[24,-91],[22,-76],[-22,-76]],'#324c67d9','#192d46',2);
+  if(side){ell(9,-83,10,7,'#70e9ef9c','#d5fbff',1.5);}
+  else{ell(-10,-83,9,7,'#70e9ef9c','#d5fbff',1.5);ell(10,-83,9,7,'#70e9ef9c','#d5fbff',1.5);}
+  line([[-17,-87],[17,-87]],'#ffffff99',1.3);
+ }
+ if(a.accessory==='halo'){
+  ell(0,-132,19,5,'#b8ffff50','#e9e3a1',3);
+  ell(0,-132,14,2,'#fff4b4a0');
  }
  ctx.restore();
 }

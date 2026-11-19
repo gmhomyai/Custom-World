@@ -1,0 +1,5 @@
+# Map Editor prototype
+
+Serve the repository root over HTTP and open `/editor/`. Choose a category on the left, select an illustrated library item below the map, and click the map to place it. Choose select mode and drag an item's ground anchor to move it; use the inspector to scale, rotate in the image plane, or delete it. Right-drag or use arrow keys to pan. Save downloads JSON; open validates a JSON file and asks for confirmation before replacing a nonempty scene. Changes are not autosaved, so download before refreshing or closing.
+
+While a library item is selected, a translucent preview follows the pointer; its ground marker turns red outside the map. This editor is separate from TD and does not change its map. JSON contains only decorative objects and their transforms, not paths, terrain editing, collision, gameplay or elevation. Sprites are procedural Canvas drawings, not 3D models. Rotation is 2D image-plane rotation, not a change of isometric viewpoint. Save files locally; nothing is uploaded.

@@ -1,0 +1,51 @@
+# Custom World — Co-op TD implementation handoff (2026-11-19)
+
+**Status:** User explicitly authorized starting implementation. Design approved through rule 146. Existing TD code not yet confirmed; inspect repository before editing. This document supplements `TD_COOP_DESIGN_HANDOFF_2026-11-18.md`; later decisions here override conflicting older rules. Do not silently change approved mechanics.
+
+## Immediate OpenCode task: playable vertical slice (first 5 waves)
+1. Inspect current repo structure, scripts, `index.html`, and existing specifications. Preserve working Cloudflare Pages lobby at https://custom-world-b7s.pages.dev/; do not replace it blindly.
+2. Add a modular Co-op TD minigame entry (route/portal or launcher as appropriate to existing architecture). Use original/free-to-use assets or placeholders; no Warcraft copyrighted art/audio.
+3. First milestone: single-client prototype with fixed path, one lane and merged-road-ready map structure, wave spawns, movement, HP, damage, gold, build/sell/upgrade, shared lives, victory/defeat and **5 playable test waves**. Keep interfaces extendable to multiplayer and full 50 waves. Do not claim multiplayer exists until implemented.
+4. Build the **seven tower archetypes** listed below; placeholder effects acceptable for first slice, but ensure all core attack/buff rules and target restrictions work. Add simple UI for selection, stats, upgrades and controls.
+5. Provide build/run/test instructions and brief implementation report. Run existing checks, avoid regressions. Ask only if blocked by a major architectural decision.
+
+**Important scope:** 5 waves are a *development milestone*, NOT a change to the approved final 50-wave game. Do not add bosses in the first five waves; final game bosses at 10/20/30/40/50. Use configuration for balance constants not yet approved, mark provisional.
+
+## Core map/game rules (approved)
+- Fixed-path classic TD, no maze or path blocking. Multiple player lanes eventually merge into a **common road** before shared castle (not separate arena). Players can cross lanes and place towers on any buildable ground, including other players' lanes and common road; towers belong to builder. **No tower may be built on any monster path or overlap another real tower.** Number of lanes equals actual active players; no auto-fill empty slots.
+- Shared castle lives abstract, not destructible/repairable. Leaks through common road deduct shared lives (bosses more); starting lives scale by lanes, exact values TBD. Win after 50 waves with lives remaining and all monsters cleared.
+- Waves synchronized; 20 sec preparation before wave 1; after all creeps killed/escaped, 5 sec countdown then next wave. No wave overlap. Build/sell/upgrade anytime. No advance boss warning. Easy/Normal/Hard affect creep HP/count, not speed.
+- Personal gold; last-hit tower owner receives kill gold (including shared road), plus personal wave-end income; no gold transfer. Sell immediately, refund **75% of total investment including upgrades**, no confirmation. Group upgrade cheapest first until remaining funds insufficient; group sell only own towers.
+- Monsters have HP bars toggleable per viewer; wave number, total remaining monsters across map, personal gold always visible; teammate gold on demand. Shared lives bar over castle, toggleable. Damage numbers white normal/yellow crit/red miss, toggleable. Attack effects high/medium/low/off per player. HUD elements can be resized/repositioned/hidden, saved account-wide and synchronized across devices; full HUD toggle. HUD-edit-mode interaction **not decided**.
+- Selected tower(s) show range rings; multi-select box possible. Action menu info/upgrade/sell; Warcraft-like configurable hotkeys U upgrade, S sell. Settings shared across minigames; category or all reset requires confirmation. Music per map; boss music on boss waves, revert after; short wave start sound, no voice.
+- Player-owned towers can be built anywhere allowed, upgraded/sold only by owner; targeting nearest valid monster initially, **stick with current target until death or exit from range**. Fired homing projectiles hit even if monster exits range; disappear if target dies first. Tower auto-faces target; aura towers act all directions.
+
+## Seven tower archetypes (approved; all max 5 upgrade steps, no per-type quantity caps)
+1. **Rapid ground:** cheap, single target, fast attacks, low damage, ground-only.
+2. **Anti-air:** very expensive, very high damage, targets **flying enemies only** (original wording clarified in design discussion).
+3. **Slow pulse:** medium cost, short range, medium attack rate, AoE pulse periodically only if enemies in range; ground+air; damage plus slow. Slow from multiple towers stacks up to a cap, lasts only while enemy remains in range of at least one applicable slow tower; certain enemies/bosses immune to status but still take damage. Visible icy/blue effects on affected enemies intensify with actual slow strength, no advance immunity indicator. AoE primary target full damage / splash targets reduced where applicable; pulse hits all in range.
+4. **Ultimate Magic Tower:** **extremely expensive**, high-damage slow-firing AoE, medium range, **ground-only**. Charge-up animation before every shot (no charge-up sound), giant magic beam and explosive impact **every shot**, especially elaborate at level 5 (larger beam, layered magic circles). Sound on firing and explosion; overlapping towers' sounds stack rather than automatically merging. Graphics detail may adapt under heavy load per viewer, preserving beam/explosion core.
+5. **Versatile:** expensive, medium damage/range, ground+air.
+6. **Damage aura magic:** expensive, long support radius, buffs **only towers owned by same player**, not teammates.
+7. **Attack speed aura magic:** expensive, long support radius, same ownership restriction.
+
+Aura buffs: damage and speed buffs coexist; same-type buffs do NOT stack; choose highest-level applicable aura. Upgrading aura increases buff strength AND radius. Selling aura removes its buff instantly, falling back to next strongest eligible aura. Buff icons over buffed towers appear **periodically**, not constantly; selected tower detail shows base stat and bonus separately e.g. `250 +50` (illustrative). Tower info shows name/type/level/base and bonus stats, upgrade price, upgrade/sell buttons; future magic attack-mode selector planned but **not active in MVP**. Before upgrading show price only, not expected stat gains; insufficient gold disables upgrade button; max level shows disabled `MAX LEVEL`.
+
+All towers max **five upgrade steps** (replaces previous unlimited upgrade proposal); power scaling balanced, costs increase. Ordinary towers grow visually while retaining same placement footprint; large towers change appearance instead of growing. Major visual transformation at levels 3 and 5, minor details at other steps; short upgrade transformation animation, but stats take effect immediately. Building completes instantly with short cosmetic construction animation; tower is immediately combat-ready. Range/buff circles appear in build preview, green valid/red invalid; tower orientation automatic.
+
+**Ghost Tower queue:** user can place translucent planned towers with insufficient gold. They cost nothing until actual successful construction; FIFO, no skipping unaffordable head; can move/edit/cancel. Visible to teammates, **do not reserve space**. If real tower built at planned tile first, affected ghost auto-cancels silently, no charge; others keep order. When enough gold and space valid, construct instantly with cosmetic animation. Check validity again at construction.
+
+## Multiplayer/lobby rules for later phases (do not fake implementation)
+- Host selects map, capacity, public/private, Easy/Normal/Hard; 50 waves, boss every 10 waves. Active player lanes and independent gold; co-op vs versus are separate minigames.
+- AFK after 120s without key/mouse/touch input, no warning; weak AI takeover, upgrades highest damage owned towers as soon as funds allow, **does not build new towers**. AI/disconnect statuses above avatars; 5-second corner notifications. If strictly >50% players AFK or disconnected/AI-controlled, match ends. Host AFK: AI takes over; host **disconnect**: match ends immediately, all zero points, no host transfer.
+- Return/reconnect: one AI-takeover episode can retain score eligibility if timely within 60 seconds after takeover; confirmation within 30 seconds of reconnect, auto-entry 60 seconds after reconnect; potential timing ambiguity must be clarified before implementing scoring. Second episode no score eligibility. Active teammates may earn hardship bonus, formula TBD. Host kicks do not count.
+- Spectators allowed by default; host can disable/set cap before room creation, not toggle later; kick/ban spectators until room ends. Shared visible chat with spectator labels, spectator count/list, real-time viewing. Host-performance-based degradation first reduces spectator updates, then refuses new spectators; no pre-room benchmark. Ping warning corner.
+- Publicly viewable replay for **all** rooms including private rooms, event/state-log replay with pause/seek, 1x/2x/4x, free camera/follow; replay and room history expire after 7 days. End match simple kills/points summary; detailed history via replay. Consider privacy implications before implementation but don't silently change approval.
+- Controls click-to-move or WASD+mouse, touch planned; shared Custom World avatar identity, map-specific builder role. All account settings shared across minigames.
+
+## Outstanding decisions / implementation cautions
+- Balance values, upgrade cost formulas, exact life count, scoring and hardship bonus remain provisional; do not present example numbers as approved.
+- Rule 92 HUD editing mode was never chosen; do not invent a final choice.
+- No transfer of gold, no wave overlap, no blocking path. Support multiple lanes and authoritative server simulation in architecture, even though first playable slice may be single-client.
+- First implement testable mechanics before expensive art/FX, but preserve approved visual intent.
+- Do not modify unrelated minigames or overwrite the existing lobby.

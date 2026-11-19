@@ -1,7 +1,7 @@
 // Shared 2D character profile used by avatar editor and Lobby.
 // Versioned browser-local data; server persistence will be added later.
 import {AVATAR_2D_DEFAULTS} from './assets/td-kit/avatar-sprite.mjs';
-import {AVATAR_HAIR_STYLES,AVATAR_OUTFITS,AVATAR_ACCESSORIES} from './avatar-items.js';
+import {AVATAR_HAIR_STYLES,AVATAR_OUTFITS,AVATAR_ACCESSORIES,AVATAR_EQUIPMENT} from './avatar-items.js';
 export const CHARACTER_STORAGE_KEY='custom-world-character-v1';
 const LEGACY_KEY='custom-world-avatar-2d-concept-v1';
 const COLORS=['skin','hair','shirt','pants','shoes'];
@@ -12,6 +12,7 @@ export function validateCharacter(raw){
  if(AVATAR_HAIR_STYLES.some(x=>x.id===raw.hairStyle))avatar.hairStyle=raw.hairStyle;
  if(AVATAR_OUTFITS.some(x=>x.id===raw.outfit))avatar.outfit=raw.outfit;
  if(AVATAR_ACCESSORIES.some(x=>x.id===raw.accessory))avatar.accessory=raw.accessory;
+ for(const [slot,items] of Object.entries(AVATAR_EQUIPMENT))if(items.some(x=>x.id===raw[slot]))avatar[slot]=raw[slot];
  return avatar;
 }
 export function loadCharacter(){try{return validateCharacter(JSON.parse(localStorage.getItem(CHARACTER_STORAGE_KEY)||localStorage.getItem(LEGACY_KEY)||'null'));}catch{return validateCharacter(null);}}

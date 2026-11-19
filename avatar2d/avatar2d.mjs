@@ -1,13 +1,14 @@
 import {AVATAR_HAIR_STYLES,AVATAR_OUTFITS} from '../avatar-items.js';
 import {AVATAR_2D_DEFAULTS,drawAvatarSprite} from '../assets/td-kit/avatar-sprite.mjs';
-const $=s=>document.querySelector(s),canvas=$('#avatar'),ctx=canvas.getContext('2d'),key='custom-world-avatar-2d-concept-v1';
-let avatar={...AVATAR_2D_DEFAULTS},category='hairStyle',directionIndex=0;
+import {loadCharacter,saveCharacter} from '../character-profile.mjs';
+const $=s=>document.querySelector(s),canvas=$('#avatar'),ctx=canvas.getContext('2d');
+let avatar=loadCharacter(),category='hairStyle',directionIndex=0;
 const directions=[['front','ด้านหน้า'],['right','ด้านขวา'],['back','ด้านหลัง'],['left','ด้านซ้าย']];
 $('#turnLeft').onclick=()=>{directionIndex=(directionIndex+3)%4;draw();};$('#turnRight').onclick=()=>{directionIndex=(directionIndex+1)%4;draw();};
-try{const saved=JSON.parse(localStorage.getItem(key)||'null');if(saved&&typeof saved==='object'){for(const k of ['skin','hair','shirt','pants','shoes'])if(/^#[0-9a-f]{6}$/i.test(saved[k]))avatar[k]=saved[k];if(AVATAR_HAIR_STYLES.some(v=>v.id===saved.hairStyle))avatar.hairStyle=saved.hairStyle;if(AVATAR_OUTFITS.some(v=>v.id===saved.outfit))avatar.outfit=saved.outfit;}}catch{ /* defaults when storage is unavailable */ }
+
 const groups=[['hairStyle','ทรงผม'],['outfit','ชุด'],['colors','สีตัวละคร']];
 for(const [id,label] of groups){const b=document.createElement('button');b.dataset.category=id;b.textContent=label;b.onclick=()=>{category=id;renderPalette();};$('#categories').append(b);}
-function save(){try{localStorage.setItem(key,JSON.stringify(avatar));$('#status').textContent='บันทึกค่าตัวละคร 2D ในเบราว์เซอร์แล้ว';}catch{$('#status').textContent='บันทึกไม่ได้: เบราว์เซอร์ไม่อนุญาตให้ใช้พื้นที่เก็บข้อมูล';}}
+function save(){try{saveCharacter(avatar);$('#status').textContent='บันทึกตัวละครแล้ว · ใช้ใน Lobby 2D ได้';}catch{$('#status').textContent='บันทึกไม่ได้: เบราว์เซอร์ไม่อนุญาตให้ใช้พื้นที่เก็บข้อมูล';}}
 function renderPalette(){$('#palette').replaceChildren();$('#paletteTitle').textContent=groups.find(g=>g[0]===category)[1];for(const b of document.querySelectorAll('[data-category]')){const active=b.dataset.category===category;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));}
  if(category==='colors'){for(const [id,label] of [['skin','สีผิว'],['hair','สีผม'],['shirt','สีเสื้อ'],['pants','สีกางเกง'],['shoes','สีรองเท้า']]){const wrapper=document.createElement('label');wrapper.className='color-card';wrapper.textContent=label;const input=document.createElement('input');input.type='color';input.value=avatar[id];input.oninput=()=>{avatar[id]=input.value;save();draw();};wrapper.append(input);$('#palette').append(wrapper);}return;}
  for(const item of category==='hairStyle'?AVATAR_HAIR_STYLES:AVATAR_OUTFITS){const b=document.createElement('button');b.className='item-card';b.classList.toggle('active',avatar[category]===item.id);const preview=document.createElement('canvas');preview.width=80;preview.height=68;preview.setAttribute('aria-hidden','true');const c=preview.getContext('2d');c.translate(40,61);c.scale(.65,.65);drawAvatarSprite(c,{...avatar,[category]:item.id});const label=document.createElement('span');label.textContent=item.name;b.append(preview,label);b.onclick=()=>{avatar[category]=item.id;save();draw();renderPalette();};$('#palette').append(b);}}

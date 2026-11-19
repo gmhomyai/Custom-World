@@ -1,3 +1,41 @@
+# Custom World — สถานะล่าสุด / เริ่มงานจากเครื่องอื่น
+
+## อัปเดต 19 พฤศจิกายน 2026 — ตัวละคร 2D และระบบแต่งตัว
+**ทิศทางล่าสุดที่ผู้ใช้ยืนยัน:** ยกเลิกแผนพัฒนาโลกหลัก 3D เปลี่ยนเป็นโลก 2D ที่สวยงาม โดยตัวละครเป็น Anime Chibi แบบมีรายละเอียด และฉากสามารถใช้มุมมอง 2.5D/isometric ได้ ไม่จำกัดธีมชุด: แฟนตาซี ทหาร ไซไฟ และผสมข้ามธีมได้ ห้ามเปลี่ยน UI/พื้นหลัง/ปุ่มของ Character Editor โดยไม่จำเป็น และต้องใช้ตัวละครเดียวกันใน Lobby และแผนที่โดยไม่ทิ้งรายละเอียดต้นฉบับ
+
+**Repo:** `gmhomyai/Custom-World` (PRIVATE, ห้ามเปลี่ยนเป็น public), branch `main`  
+**เว็บ:** https://custom-world-b7s.pages.dev/  
+**หน้าแต่งตัว:** https://custom-world-b7s.pages.dev/avatar2d/  
+**Map Editor:** https://custom-world-b7s.pages.dev/editor/
+
+### งานที่ลง GitHub แล้ว
+- `assets/td-kit/avatar-sprite.mjs`: วาดตัวละคร Anime Chibi ผ่าน Canvas แบบ 4 ทิศทาง มีรายละเอียดหน้า ผม เสื้อผ้า และอุปกรณ์; เป็น procedural artwork ไม่ใช่ภาพ AI คุณภาพสูง
+- `character-profile.mjs`: บันทึกตัวละครแบบ versioned ผ่าน localStorage (รวมข้อมูลจาก key เก่า) และตรวจค่าที่เลือก; ใช้บนเบราว์เซอร์/โดเมนเดียวกันเท่านั้น ยังไม่ซิงก์ข้ามเครื่อง
+- `avatar-items.js`: แคตตาล็อกทรงผม ชุด เครื่องประดับ และอุปกรณ์แยกช่อง
+- `avatar2d/avatar2d.mjs`: เลือกสี ทรงผม ชุด เครื่องประดับ และหมวด `head`, `armor`, `legs`, `feet`, `weapon` โดยใช้ renderer เดียวกับ Lobby
+- `index.html`: Lobby แสดงตัวละครจาก profile เดียวกัน หันตามทิศเดิน; NPC และฉากยังคงเดิม
+- ชุดเพิ่ม: ทหาร/เกราะพลังงาน; หมวกทหาร/มงกุฎ/หมวกไฮเทค; เกราะหนัง/เหล็ก/จักรกล; กางเกงทหาร/เกราะขา; บูต/รองเท้าจักรกล; ดาบ/คทา/ปืนพลังงาน; แว่นตา/แว่นไซไฟ/ผ้าคลุม/วงแหวนเวท
+- Commit ล่าสุดของระบบแต่งตัว: `9f02e53b467680a91ad92d33be8ea4d9bd4c5b14` (UI ช่องอุปกรณ์); renderer: `4d28b733190ce0c34769186e32a8a35c081147d0`
+
+### งานค้าง / ข้อจำกัดจริง
+- ผู้ใช้ยืนยันว่า 2D และตัวละครเวอร์ชันก่อนหน้ามีการเปลี่ยนและใช้งานได้ แต่ **ยังไม่มีผลทดสอบจากผู้ใช้สำหรับชุดอุปกรณ์แยกช่องล่าสุด**; ต้องทดสอบ browser + mobile และตรวจ Cloudflare deploy
+- ยังไม่มีภาพวาด Chibi high-res แบบแยกไฟล์ sprite sheet; ตอนนี้เป็น Canvas procedural; ต้องเพิ่มความละเอียดจริงอย่างเป็นระบบ
+- ยังไม่มี animation เดิน/โจมตี, อุปกรณ์หลายตำแหน่งใน slot เดียว, ระบบตรวจทับซ้อนอุปกรณ์, anchor ตามทิศ/ท่าทาง, sprite atlas, server inventory, account persistence หรือ multiplayer จริง
+- Legacy `3d.html` และไฟล์ GLB ยังอยู่; ห้ามลบทิ้งก่อนตรวจ dependency และวางแผนย้าย
+- Lobby ยังเป็น prototype single-player และ NPC จำลอง; Map Editor/TD เป็นระบบแยก ไม่ได้เชื่อมตัวละครทุกฉากแล้ว
+- เก็บโค้ดเดิมที่ทำงานได้ และอย่าอ้างว่าทดสอบบนเว็บแล้วหากยังไม่ได้ทดสอบ
+
+### ลำดับทำงานต่อที่แนะนำ
+1. ทดสอบการเปลี่ยนช่องอุปกรณ์ทุกหมวด ทุกทิศทาง และบันทึก/โหลดกลับ รวมถึงทดสอบ Lobby
+2. ปรับระบบการซ้อนชั้น (back/front), anchor ของอาวุธ/หมวก/ผ้าคลุม และ preview ให้ไม่ถูกตัดขอบ
+3. แยก asset/render pipeline เป็น high-resolution layered 2D sprites พร้อม fallback, animation และคงข้อมูลอุปกรณ์เดิม
+4. เชื่อม character profile กับแผนที่จริง และออกแบบข้อมูลตัวละครฝั่งเซิร์ฟเวอร์สำหรับ multiplayer
+
+### วิธีต่อจากเครื่องอื่น / OpenCode
+เปิด repo private ด้วยบัญชี GitHub ที่มีสิทธิ์, checkout `main`, pull ล่าสุด และอ่านไฟล์ `PROJECT_STATUS.md`, `2D_WORLD_DIRECTION_2026-11-19.md`, `avatar-items.js`, `character-profile.mjs`, `avatar2d/avatar2d.mjs`, `assets/td-kit/avatar-sprite.mjs`, `index.html`. ไม่ต้องเปิด repo เป็น public และไม่ต้องใช้ข้อมูลจากเครื่องเก่าถ้ามี repo ล่าสุดแล้ว (ยกเว้น localStorage ตัวละครซึ่งไม่ซิงก์ข้ามเครื่อง)
+
+---
+
 # Custom World — สรุปล่าสุดสำหรับทำงานต่อ
 
 ## งานล่าสุด — 19 พฤศจิกายน 2026
